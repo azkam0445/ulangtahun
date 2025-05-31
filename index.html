@@ -1,1 +1,710 @@
-<html><html><head><title>My Site</title></head><body><h1>Hello World</h1></body></html>
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>Ulang Tahun</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: black;
+        color: white;
+        font-family: "Segoe UI", sans-serif;
+        overflow: hidden;
+        touch-action: pan-y;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .slides-container {
+        display: flex;
+        width: 300vw;
+        height: 100vh;
+        transition: transform 0.5s ease-in-out;
+      }
+
+      .slide {
+        width: 100vw;
+        height: 100vh;
+        flex-shrink: 0;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        display: flex;
+        padding: clamp(15px, 5vw, 30px);
+      }
+
+      #typing-text {
+        font-size: clamp(20px, 6vw, 32px);
+        white-space: nowrap;
+        overflow: hidden;
+        border-right: 2px solid white;
+        width: 0;
+        animation: typing 5s steps(30, end) forwards,
+          blink 0.7s step-end infinite;
+        max-width: 90vw;
+      }
+
+      @keyframes typing {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+
+      @keyframes blink {
+        50% {
+          border-color: transparent;
+        }
+      }
+
+      .cake {
+        width: clamp(80px, 20vw, 100px);
+        height: clamp(96px, 24vw, 120px);
+        background: #ff4081;
+        border-radius: 10px;
+        position: relative;
+        margin: clamp(20px, 8vw, 30px) auto;
+        animation: float 2s ease-in-out infinite;
+      }
+
+      .candle {
+        width: clamp(8px, 2vw, 10px);
+        height: clamp(24px, 6vw, 30px);
+        background: yellow;
+        position: absolute;
+        top: clamp(-24px, -6vw, -30px);
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 5px;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .btn {
+        margin: clamp(8px, 2vw, 10px) clamp(4px, 1vw, 8px);
+        padding: clamp(12px, 3vw, 15px) clamp(20px, 5vw, 25px);
+        font-size: clamp(16px, 4vw, 18px);
+        border: none;
+        border-radius: 25px;
+        background: #ff4081;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 44px; /* iOS minimum touch target */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(255, 64, 129, 0.3);
+      }
+
+      .btn:hover,
+      .btn:active {
+        background: #e91e63;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 64, 129, 0.4);
+      }
+
+      .photo-slide h2 {
+        font-size: clamp(24px, 6vw, 32px);
+        margin-bottom: clamp(15px, 4vw, 20px);
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: clamp(10px, 3vw, 15px);
+        margin: clamp(15px, 4vw, 20px) 0;
+        max-width: 100%;
+        width: 100%;
+        padding: 0 10px;
+      }
+
+      .gallery img {
+        width: 100%;
+        height: clamp(100px, 25vw, 120px);
+        object-fit: cover;
+        border-radius: 10px;
+        border: 2px solid white;
+        transition: transform 0.3s, box-shadow 0.3s;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeIn 0.5s forwards;
+        cursor: pointer;
+      }
+
+      .gallery img:hover,
+      .gallery img:active {
+        transform: scale(1.05);
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+      }
+
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .lightbox {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.9);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+      }
+
+      .lightbox img {
+        max-width: 100%;
+        max-height: 100%;
+        border: 4px solid white;
+        border-radius: 15px;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        object-fit: contain;
+      }
+
+      /* Envelope & Paper - Mobile Optimized */
+      .envelope-container {
+        position: relative;
+        width: min(85vw, 280px);
+        height: min(55vw, 180px);
+        margin: clamp(20px, 8vw, 40px) auto;
+        perspective: 1200px;
+        cursor: pointer;
+      }
+
+      .envelope {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        transform-style: preserve-3d;
+        transition: transform 1.2s ease;
+      }
+
+      .envelope.open {
+        transform: rotateX(-180deg);
+      }
+
+      .envelope .front,
+      .envelope .back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        background: linear-gradient(135deg, #ff4081, #f06292);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(14px, 4vw, 18px);
+        color: white;
+        padding: clamp(8px, 3vw, 15px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        text-align: center;
+      }
+
+      .envelope .front {
+        z-index: 2;
+      }
+
+      .envelope .back {
+        transform: rotateX(180deg);
+      }
+
+      .paper {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translate(-50%, 20px);
+        background: #fff;
+        color: #333;
+        width: clamp(280px, 90vw, 400px);
+        padding: clamp(20px, 6vw, 30px);
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        transition: transform 0.8s ease-out, opacity 0.8s ease;
+        transform-origin: top center;
+        opacity: 0;
+        z-index: 1;
+        font-size: clamp(14px, 4vw, 18px);
+        line-height: 1.6;
+        text-align: left;
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+
+      .paper.show {
+        transform: translate(-50%, -90%);
+        opacity: 1;
+      }
+
+      .harapan {
+        font-size: clamp(14px, 4vw, 18px);
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      /* Button Container for Better Mobile Layout */
+      .button-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: clamp(15px, 4vw, 20px);
+        width: 100%;
+      }
+
+      /* Memory Time Description */
+      .memory-description {
+        font-size: clamp(14px, 4vw, 16px);
+        margin: clamp(15px, 4vw, 20px) 0;
+        padding: 0 20px;
+        line-height: 1.4;
+      }
+
+      /* Slide 2 specific styling */
+      .slide:nth-child(2) h2 {
+        font-size: clamp(20px, 6vw, 28px);
+        margin-bottom: clamp(15px, 4vw, 20px);
+      }
+
+      /* Improve touch responsiveness */
+      @media (max-width: 480px) {
+        .slides-container {
+          touch-action: pan-x;
+        }
+
+        .btn {
+          min-width: 120px;
+        }
+
+        .gallery {
+          grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        }
+
+        #typing-text {
+          font-size: clamp(18px, 5vw, 24px);
+        }
+      }
+
+      /* Very small screens */
+      @media (max-width: 360px) {
+        .slide {
+          padding: 10px;
+        }
+
+        .paper {
+          width: 95vw;
+          padding: 15px;
+        }
+
+        .envelope-container {
+          width: min(90vw, 250px);
+          height: min(60vw, 160px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+
+    <div id="slider" class="slides-container">
+      <!-- SLIDE 1 -->
+      <div class="slide">
+        <h1 id="typing-text">Selamat Ulang Tahun Sayang! 🎉</h1>
+        <div class="cake"><div class="candle"></div></div>
+        <div class="button-container">
+          <button class="btn" onclick="playMusic()">🔊 Mainkan Musik</button>
+          <button class="btn" onclick="nextSlide()">Lanjut ➡️</button>
+        </div>
+      </div>
+
+      <!-- SLIDE 2 (Amplop) -->
+      <div class="slide">
+        <h2>🎂 Harapan untukmu 🎂</h2>
+        <div class="envelope-container" onclick="openEnvelope()">
+          <div class="envelope" id="envelope">
+            <div class="front">📩 Ketuk untuk membuka</div>
+            <div class="back">📨 Terbuka</div>
+          </div>
+          <div class="paper" id="paper">
+            <p class="harapan">
+              Di hari yang penuh kebahagiaan ini, semoga kamu diberikan panjang
+              umur, sehat selalu, rejeki yang lancar, dan semua yang kamu
+              impikan cita cita kamu tercapai. Selamat bertambah usia pacarku,
+              semoga kedepannya kita selalu sama sama sampe takdir berkata.<br /><br />
+              Terima kasih sudah menjadi bagian terindah dalam hidupku. Aku
+              sayang kamu, selalu. ❤️
+            </p>
+          </div>
+        </div>
+
+        <div class="button-container">
+          <button class="btn" onclick="prevSlide()">⬅️ Kembali</button>
+          <button class="btn" onclick="nextSlide()">Lanjut ➡️</button>
+        </div>
+      </div>
+
+      <!-- SLIDE 3 (Galeri Foto) -->
+      <div class="slide photo-slide">
+        <h2>📸 MEMORY TIME 📸</h2>
+        <div class="gallery">
+          <img
+            src="poto/WhatsApp Image 2025-05-25 at 22.31.06.jpeg"
+            alt="Kenangan 1"
+          />
+          <img
+            src="poto/WhatsApp Image 2025-05-25 at 22.31.09.jpeg"
+            alt="Kenangan 2"
+          />
+          <img
+            src="poto/WhatsApp Image 2025-05-25 at 22.31.10.jpeg"
+            alt="Kenangan 3"
+          />
+          <img
+            src="poto/WhatsApp Image 2025-05-25 at 22.31.11.jpeg"
+            alt="Kenangan 4"
+          />
+          <img
+            src="poto/WhatsApp Image 2025-05-25 at 22.31.11 (1).jpeg"
+            alt="Kenangan 5"
+          />
+        </div>
+        <p class="memory-description">
+          Moment dimana kita main dan jajan keliling serang
+        </p>
+        <div class="button-container">
+          <button class="btn" onclick="prevSlide()">⬅️ Kembali</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+      <img src="" id="lightbox-img" alt="preview" />
+    </div>
+
+    <!-- Musik -->
+    <audio id="bg-music" loop>
+      <source
+        src="music/Ed Sheeran - Perfect (lyrics) Mix Playlist.mp3"
+        type="audio/mpeg"
+      />
+      Browser Anda tidak mendukung audio.
+    </audio>
+
+    <script>
+      // Slider logic
+      let currentSlide = 0;
+      const totalSlides = 3;
+      const slider = document.getElementById("slider");
+
+      function updateSlide() {
+        slider.style.transform = `translateX(-${currentSlide * 100}vw)`;
+
+        // Reset typing animation saat kembali ke slide 0
+        if (currentSlide === 0) {
+          const typing = document.getElementById("typing-text");
+          typing.style.animation = "none";
+          typing.offsetHeight;
+          typing.style.animation =
+            "typing 5s steps(30, end) forwards, blink 0.7s step-end infinite";
+        }
+
+        // Trigger animasi fade-in galeri
+        if (currentSlide === 2) {
+          const imgs = document.querySelectorAll(".gallery img");
+          imgs.forEach((img, index) => {
+            img.style.animationDelay = `${index * 0.2}s`;
+          });
+        }
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateSlide();
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateSlide();
+        }
+      }
+
+      // Improved touch handling
+      let startX = 0;
+      let startY = 0;
+      let isDragging = false;
+
+      slider.addEventListener(
+        "touchstart",
+        (e) => {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          isDragging = true;
+        },
+        { passive: true }
+      );
+
+      slider.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!isDragging) return;
+
+          const currentX = e.touches[0].clientX;
+          const currentY = e.touches[0].clientY;
+          const diffX = Math.abs(currentX - startX);
+          const diffY = Math.abs(currentY - startY);
+
+          // Only prevent default if horizontal swipe is dominant
+          if (diffX > diffY) {
+            e.preventDefault();
+          }
+        },
+        { passive: false }
+      );
+
+      slider.addEventListener(
+        "touchend",
+        (e) => {
+          if (!isDragging) return;
+          isDragging = false;
+
+          const endX = e.changedTouches[0].clientX;
+          const endY = e.changedTouches[0].clientY;
+          const diffX = startX - endX;
+          const diffY = Math.abs(startY - endY);
+
+          // Only trigger slide change if horizontal movement is dominant and significant
+          if (Math.abs(diffX) > diffY && Math.abs(diffX) > 50) {
+            if (diffX > 0) {
+              nextSlide();
+            } else {
+              prevSlide();
+            }
+          }
+        },
+        { passive: true }
+      );
+
+      function playMusic() {
+        const music = document.getElementById("bg-music");
+        const btn = event.target;
+
+        if (music.paused) {
+          music
+            .play()
+            .then(() => {
+              btn.textContent = "🔇 Pause Musik";
+            })
+            .catch((e) => {
+              console.log("Audio play failed:", e);
+              btn.textContent = "🔊 Coba Lagi";
+            });
+        } else {
+          music.pause();
+          btn.textContent = "🔊 Mainkan Musik";
+        }
+      }
+
+      function openEnvelope() {
+        const envelope = document.getElementById("envelope");
+        const paper = document.getElementById("paper");
+
+        if (!envelope.classList.contains("open")) {
+          envelope.classList.add("open");
+
+          setTimeout(() => {
+            paper.classList.add("show");
+          }, 700);
+        }
+      }
+
+      // Lightbox with improved mobile handling
+      const galleryImgs = document.querySelectorAll(".gallery img");
+      const lightbox = document.getElementById("lightbox");
+      const lightboxImg = document.getElementById("lightbox-img");
+
+      galleryImgs.forEach((img) => {
+        img.addEventListener("click", (e) => {
+          e.stopPropagation();
+          lightboxImg.src = img.src;
+          lightbox.style.display = "flex";
+          document.body.style.overflow = "hidden"; // Prevent background scroll
+        });
+      });
+
+      lightbox.addEventListener("click", () => {
+        lightbox.style.display = "none";
+        document.body.style.overflow = "hidden"; // Keep original overflow
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          lightbox.style.display = "none";
+          document.body.style.overflow = "hidden";
+        }
+      });
+
+      // Fireworks animation - optimized for mobile
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      resizeCanvas();
+
+      let fireworks = [],
+        gravity = 0.2;
+      const rnd = Math.random;
+
+      // Reduce particle count for mobile performance
+      const isMobile = window.innerWidth < 768;
+      const particleCount = isMobile ? 50 : 100;
+
+      function vector(x, y) {
+        this.x = x;
+        this.y = y;
+        this.add = (v) => {
+          this.x += v.x;
+          this.y += v.y;
+        };
+      }
+
+      function particle(pos, vel) {
+        this.pos = new vector(pos.x, pos.y);
+        this.vel = vel;
+        this.finish = false;
+        this.start = 0;
+        this.update = (time) => {
+          if (time - this.start > 500) this.finish = true;
+          if (!this.finish) {
+            this.pos.add(this.vel);
+            this.vel.y += gravity;
+          }
+        };
+        this.draw = () => !this.finish && drawDot(this.pos.x, this.pos.y, 1);
+      }
+
+      function firework(x, y) {
+        this.pos = new vector(x, y);
+        this.vel = new vector(0, -rnd() * 10 - 3);
+        this.color = `hsl(${rnd() * 360}, 100%, 50%)`;
+        this.size = 4;
+        this.finish = false;
+        this.start = 0;
+        let exploded = false,
+          particles = [];
+
+        this.update = (time) => {
+          if (this.finish) return;
+          if (!exploded) {
+            this.pos.add(this.vel);
+            this.vel.y += gravity;
+            if (this.vel.y >= 0) {
+              exploded = true;
+              for (let i = 0; i < particleCount; i++) {
+                let p = new particle(
+                  this.pos,
+                  new vector((rnd() - 0.5) * 10, (rnd() - 0.5) * 10)
+                );
+                p.start = time;
+                particles.push(p);
+              }
+            }
+          } else {
+            let done = 0;
+            particles.forEach((p) => {
+              p.update(time);
+              if (p.finish) done++;
+            });
+            if (done === particles.length) this.finish = true;
+          }
+        };
+
+        this.draw = () => {
+          ctx.fillStyle = this.color;
+          if (!exploded) drawDot(this.pos.x, this.pos.y, this.size);
+          else particles.forEach((p) => p.draw());
+        };
+      }
+
+      function drawDot(x, y, size) {
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function initFireworks() {
+        const fireworkCount = isMobile ? 10 : 20;
+        for (let i = 0; i < fireworkCount; i++) {
+          let f = new firework(rnd() * canvas.width, canvas.height);
+          f.start = performance.now();
+          fireworks.push(f);
+        }
+      }
+
+      function animateFireworks(time) {
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        fireworks.forEach((f, i) => {
+          if (f.finish) {
+            fireworks[i] = new firework(rnd() * canvas.width, canvas.height);
+            fireworks[i].start = time;
+          }
+          f.update(time);
+          f.draw();
+        });
+
+        requestAnimationFrame(animateFireworks);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+
+      initFireworks();
+      animateFireworks();
+    </script>
+
+    <audio id="click-sound" src="sounds/click.mp3" preload="auto"></audio>
+  </body>
+</html>
